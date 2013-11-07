@@ -2,10 +2,27 @@ package com.sample
  
 import com.sample.DroolsTest.Message;
 
-//This compilation fails because field 'm.status' is not visible, even though we're using MVEL
-//and because both 'Message.HELLO' and 'Message.GOODBYE' can't be resolved.
+//This compilation fails because 'Message.HELLO' and 'Message.GOODBYE' can't be resolved when using java dialect.
 /*
-rule "Hello World-Goodbye"
+rule "Hello World-Goodbye" dialect "java"
+    when
+        m : Message( myMessage : message )
+        if (m.getStatus() == Message.HELLO) break [sayHello]
+        else if (m.getStatus() == Message.GOODBYE) break [sayGoodbye]
+    then
+    	System.out.println("Not hello and not Goodbye: " + myMessage);    
+    then[sayHello]
+        System.out.println( myMessage );
+        m.setMessage( "Goodbye cruel world" );
+        m.setStatus( Message.GOODBYE );
+        update( m );
+    then[sayGoodbye]
+    	System.out.println( myMessage );
+end
+*/
+
+//When we switch to a "mvel" dialect, it does work.
+rule "Hello World-Goodbye" dialect "mvel"
     when
         m : Message( myMessage : message )
         if (m.status == Message.HELLO) break [sayHello]
@@ -20,25 +37,7 @@ rule "Hello World-Goodbye"
     then[sayGoodbye]
     	System.out.println( myMessage );
 end
-*/
 
 
-//When we switch to a "java" dialect, use 'm.getStatus' and use the actual values of Message.HELLO and Message.GOODBYE, the rule does compile.
-
-rule "Hello World-Goodbye" dialect "java"
-    when
-        m : Message( myMessage : message )
-        if (m.getStatus() == 0) break [sayHello]
-        else if (m.getStatus() == 1) break [sayGoodbye]
-    then
-    	System.out.println("Not hello and not Goodbye: " + myMessage);    
-    then[sayHello]
-        System.out.println( myMessage );
-        m.setMessage( "Goodbye cruel world" );
-        m.setStatus( Message.GOODBYE );
-        update( m );
-    then[sayGoodbye]
-    	System.out.println( myMessage );
-end
 
 
